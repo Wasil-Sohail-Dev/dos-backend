@@ -312,8 +312,9 @@ const getAllDocsApi = async (req, res, next) => {
         .json({ status: "error", message: "User not found" });
     }
 
-    const docs = await Document.find({ userId: id });
+    const docs = await Document.find({ userId: id ,summary: { $exists: false } });
     console.log("docs 302", docs);
+
 
     if (!docs || docs.length == 0) {
       return res
@@ -331,7 +332,56 @@ const getAllDocsApi = async (req, res, next) => {
     );
 
     res.status(200).json({
-      status: "success",
+      status: "success", 
+      data: {
+        docsData,
+      },
+      message: "Docs fetched successfully",
+    });
+  } catch (error) {
+    console.log("Error in get all Patients", error);
+    res.status(400).json({ status: "error", message: error.message });
+  }
+};
+
+const getAllDocsForSummary = async (req, res, next) => {
+  try {
+    if (req.user === undefined) {
+      return res.status(400).json({ status: "error", message: "Invalid user" });
+    }
+    const { id } = req.user;
+    if (!id) {
+      return res.status(400).json({ status: "error", message: "Invalid id" });
+    }
+    const myUser = await User.findById(id);
+    if (!myUser) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "User not found" });
+    }
+
+    const docs = await Document.find({ userId: id ,summary: { $exists: true } });
+    console.log("docs 302", docs);
+
+
+
+    if (!docs || docs.length == 0) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "No Docs Found " });
+    }
+
+    const docsData = [];
+
+    await Promise.all(
+      docs.map(async (doc) => {
+        const myDocData = await getDocsData(doc);
+        docsData.push(myDocData);
+      })
+    );
+
+    res.status(200).json({
+      status: "success", 
       data: {
         docsData,
       },
@@ -569,12 +619,14 @@ const updateDocsCategoryApi = async (req, res) => {
 module.exports = {
   uploadDocsApi,
   getAllDocsApi,
+  getAllDocsForSummary,
   addDocsLabelApi,
   DownloadDocApi,
   DeleteDocsApi,
   EditDocsLabelApi,
   addDocsTagsApi,
   AssignDocstoPatientApi,
+
   AddCategoriesApi,
   getallPatient,
   getallCategories,
