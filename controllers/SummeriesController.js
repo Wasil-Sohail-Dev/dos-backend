@@ -24,12 +24,10 @@ const saveDocumentSummeriesApi = async (req, res) => {
       formData,
       {
         headers: {
-          'Access-Control-Allow-Origin': '*',
-          ...formData.getHeaders(),
+          ...formData.getHeaders()
         }
       }
     );
-
 
     const extractedData = analyzeResponse.data;
     
@@ -71,7 +69,7 @@ const saveFileSummeriesApi = async (req, res) => {
      const analyzeResponse = await axios.post(
        "https://a330-173-208-156-111.ngrok-free.app/process_file/",
        fileObject,
-       { headers: { "Content-Type": "application/json",'Access-Control-Allow-Origin': '*', } }
+       { headers: { "Content-Type": "application/json" } }
      );
      const extractedData = analyzeResponse.data;
 
