@@ -16,7 +16,8 @@ const s3 = new AWS.S3({
 const uploadDocsApi = async (req, res) => {
   console.log("files --->", req.files);
   try {
-    const { id, folderName } = req.body;
+    console.log("req.body", req.body);
+    const { id, folderName, summary } = req.body;
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).send("No files uploaded.");
@@ -56,6 +57,7 @@ const uploadDocsApi = async (req, res) => {
         patientId: id,
         fileUrl: uploadedImage.Location,
         categoryId: category._id,
+        summary: summary // Add summary field
       });
     });
 
@@ -71,7 +73,7 @@ const uploadDocsApi = async (req, res) => {
     );
 
     res.status(200).json({
-      status: "success",
+      status: "success", 
       data: documentsData,
       message: "Documents Uploaded Successfully",
     });
@@ -592,9 +594,11 @@ const getDocsData = async (docs) => {
     categoryId: docs?.categoryId,
     size: docs.size,
     createdAt: docs.createdAt,
-    title: docs.title || docs.originalname
+    title: docs.title || docs.originalname,
+    summary: docs.summary || "", 
   };
 };
+
 
 const getCategoryData = async (category) => {
   return {
