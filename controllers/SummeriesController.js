@@ -1,8 +1,14 @@
 const axios = require("axios");
 const fs = require('fs');
 const FormData = require('form-data');
+const cors = require('cors');
 
 const saveDocumentSummeriesApi = async (req, res) => {
+  // Enable CORS for this route
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'POST');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -54,6 +60,11 @@ const saveDocumentSummeriesApi = async (req, res) => {
 };
 
 const saveFileSummeriesApi = async (req, res) => {
+  // Enable CORS for this route
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'POST');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+
   console.log("reqqq", req.file);
    try {
      const fileObject = {
