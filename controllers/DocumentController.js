@@ -1,12 +1,10 @@
-const Catagory = require("../models/catagoriesModel");
+const Catagory = require("../models/CatagoriesModel");
 const Document = require("../models/DocumentModel");
 const HealthProviderModal = require("../models/HealthProviderModel");
 const User = require("../models/UserModel");
-const fileFullPath = require("../util/fileFullPath");
 const fs = require("fs");
 const path = require("path");
 const AWS = require("aws-sdk");
-const { v4: uuidv4 } = require("uuid");
 
 const s3 = new AWS.S3({
   endpoint: "https://s3.eu-north-1.amazonaws.com",
