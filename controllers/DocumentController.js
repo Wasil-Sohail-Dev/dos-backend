@@ -312,7 +312,7 @@ const getAllDocsApi = async (req, res, next) => {
         .json({ status: "error", message: "User not found" });
     }
 
-    const docs = await Document.find({ userId: id ,summary: { $exists: false } });
+    const docs = await Document.find({ userId: id });
     console.log("docs 302", docs);
 
 
