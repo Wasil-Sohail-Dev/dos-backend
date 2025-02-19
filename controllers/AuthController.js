@@ -562,7 +562,6 @@ const logoutApi = async (req, res, next) => {
 
 const getAllUsersApi = async (req, res, next) => {
   try {
-    // Validate user and permissions
     if (req.user === undefined) {
       return res.status(400).json({ status: "error", message: "Invalid user" });
     }
@@ -587,16 +586,20 @@ const getAllUsersApi = async (req, res, next) => {
     const sortObj = {};
     sortObj[sortBy] = sortOrder;
 
-    // Get total count of users
-    const totalUsers = await User.countDocuments({});
+    const query = {};
+    if (req.query.role) {
+      query.role = req.query.role;
+    }
+
+    const totalUsers = await User.countDocuments(query);
 
     let userData;
     let responseData;
 
     // Check if allUsers is true
     if (req.query.allUsers) {
-      // Get all users with sorting only
-      userData = await User.find({}).sort(sortObj);
+      // Get all users with sorting and role filter
+      userData = await User.find(query).sort(sortObj);
 
       // Transform user data
       const users = await Promise.all(
@@ -605,7 +608,8 @@ const getAllUsersApi = async (req, res, next) => {
 
       responseData = {
         users,
-        total: totalUsers
+        total: totalUsers,
+        ...(req.query.role && { role: req.query.role })
       };
     } else {
       // Get pagination parameters
@@ -616,8 +620,8 @@ const getAllUsersApi = async (req, res, next) => {
       // Calculate total pages
       const totalPages = Math.ceil(totalUsers / limit);
 
-      // Get users with pagination and sorting
-      userData = await User.find({})
+      // Get users with pagination, sorting, and role filter
+      userData = await User.find(query)
         .sort(sortObj)
         .skip(skip)
         .limit(limit);
@@ -636,7 +640,8 @@ const getAllUsersApi = async (req, res, next) => {
           limit,
           hasPrevPage: page > 1,
           hasNextPage: page < totalPages,
-        }
+        },
+        ...(req.query.role && { role: req.query.role })
       };
     }
 
@@ -645,7 +650,10 @@ const getAllUsersApi = async (req, res, next) => {
         status: "success",
         data: {
           users: [],
-          ...(req.query.allUsers ? { total: 0 } : {
+          ...(req.query.allUsers ? { 
+            total: 0,
+            ...(req.query.role && { role: req.query.role })
+          } : {
             pagination: {
               currentPage: req.query.allUsers ? 1 : page,
               totalPages: 0,
@@ -653,17 +661,18 @@ const getAllUsersApi = async (req, res, next) => {
               limit: req.query.allUsers ? null : limit,
               hasPrevPage: false,
               hasNextPage: false,
-            }
+            },
+            ...(req.query.role && { role: req.query.role })
           })
         },
-        message: "No users found"
+        message: `No users found${req.query.role ? ` with role '${req.query.role}'` : ''}`
       });
     }
 
     res.status(200).json({
       status: "success",
       data: responseData,
-      message: "Users fetched successfully",
+      message: `Users fetched successfully${req.query.role ? ` with role '${req.query.role}'` : ''}`,
     });
   } catch (error) {
     console.error("Error in getAllUsersApi:", error);
